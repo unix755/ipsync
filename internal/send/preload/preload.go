@@ -1,13 +1,11 @@
 package preload
 
 import (
-	"crypto/sha256"
 	"encoding/json"
 	"netinfo/internal/netinfo"
 	"time"
 
 	"github.com/unix755/xtools/xCrypto"
-	"github.com/unix755/xtools/xCrypto/padding"
 	"golang.org/x/crypto/chacha20poly1305"
 )
 
@@ -30,7 +28,7 @@ func newEncryptedPreload(key []byte) (preload []byte, err error) {
 	if err != nil {
 		return nil, err
 	}
-	return xCrypto.NewChaCha20Poly1305WithHashAD(key, sha256.New()).Encrypt(plaintext)
+	return xCrypto.NewChaCha20Poly1305(key, []byte{}).Encrypt(plaintext)
 }
 
 func GetPreload(key []byte) (preload []byte, err error) {
@@ -39,7 +37,7 @@ func GetPreload(key []byte) (preload []byte, err error) {
 	case 0:
 		return newPreload()
 	default:
-		key = padding.ZeroPadding(key, chacha20poly1305.KeySize)
+		key = xCrypto.ZeroPadding(key, chacha20poly1305.KeySize)
 		key = key[0:chacha20poly1305.KeySize]
 		return newEncryptedPreload(key)
 	}

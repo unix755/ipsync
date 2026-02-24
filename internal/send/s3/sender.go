@@ -21,7 +21,7 @@ func SendRequest(endpoint string, region string, accessKeyId string, secretAcces
 	if err != nil {
 		return nil, err
 	}
-	return &result.Location, nil
+	return result.Location, nil
 }
 
 func SendRequestLoop(endpoint string, region string, accessKeyId string, secretAccessKey string, stsToken string, pathStyle bool, allowInsecure bool, bucket string, objectPath string, encryptionKey []byte, interval time.Duration) {
