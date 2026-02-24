@@ -1,0 +1,11 @@
+[Unit]
+Description=WireGuard Watchdog Receiver Timer
+
+[Timer]
+Unit=wgwd.service
+OnBootSec=10s
+OnUnitActiveSec=5m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

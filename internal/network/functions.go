@@ -1,4 +1,4 @@
-package netinfo
+package network
 
 import (
 	"net/netip"

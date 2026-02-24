@@ -5,11 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"netinfo/internal/netinfo"
-	"netinfo/internal/send/file"
-	"netinfo/internal/send/preload"
-	"netinfo/internal/send/s3"
-	"netinfo/internal/send/webdav"
+	"netinfo/internal/network"
+	"netinfo/internal/preload"
+	"netinfo/internal/receive"
+	"netinfo/internal/send"
 	"os"
 	"time"
 
@@ -20,7 +19,7 @@ func main() {
 	// show mode
 	var showPreload bool
 
-	// send mode
+	// send/receive mode
 	var allowInsecure bool
 	var encryptionKey string
 	var interval time.Duration
@@ -28,15 +27,20 @@ func main() {
 	var username string
 	var password string
 
-	// send mode file
+	// send/receive mode file
 	var filepath string
 
-	// send mode s3
+	// send/receive mode s3
 	var regin string
 	var stsToken string
 	var pathStyle bool
 	var bucket string
 	var objectPath string
+
+	// wireguard
+	var remoteInterface string
+	var wgInterface string
+	var wgPeerKey string
 
 	cmds := []*cli.Command{
 		{
@@ -52,17 +56,26 @@ func main() {
 				},
 			},
 			Action: func(ctx context.Context, cmd *cli.Command) (err error) {
-				var p []byte
-				var netInterfaces []netinfo.NetInterface
+				var bytes []byte
+				var netInterfaces []network.NetInterface
 
 				if showPreload {
-					p, err = preload.GetPreload([]byte(encryptionKey))
+					// 获取负载
+					p, err := preload.NewPreload()
+					if err != nil {
+						return err
+					}
+					// 负载转换为比特流
+					bytes, err = preload.Marshal(p, "json", nil)
+					if err != nil {
+						return err
+					}
 				} else {
-					netInterfaces, err = netinfo.GetNetInterfaces()
-					p, err = json.Marshal(netInterfaces)
+					netInterfaces, err = network.GetNetInterfaces()
+					bytes, err = json.Marshal(netInterfaces)
 				}
 
-				fmt.Println(string(p))
+				fmt.Println(string(bytes))
 				return err
 			},
 		},
@@ -95,9 +108,9 @@ func main() {
 					},
 					Action: func(ctx context.Context, cmd *cli.Command) (err error) {
 						if interval != 0 {
-							file.SendRequestLoop(filepath, []byte(encryptionKey), interval)
+							send.ToFileLoop(filepath, []byte(encryptionKey), interval)
 						} else {
-							return file.SendRequest(filepath, []byte(encryptionKey))
+							return send.ToFile(filepath, []byte(encryptionKey))
 						}
 						return nil
 					},
@@ -172,9 +185,9 @@ func main() {
 					},
 					Action: func(ctx context.Context, cmd *cli.Command) (err error) {
 						if interval != 0 {
-							s3.SendRequestLoop(endpoint, regin, username, password, stsToken, pathStyle, allowInsecure, bucket, objectPath, []byte(encryptionKey), interval)
+							send.ToS3Loop(endpoint, regin, username, password, stsToken, pathStyle, allowInsecure, bucket, objectPath, []byte(encryptionKey), interval)
 						} else {
-							_, err = s3.SendRequest(endpoint, regin, username, password, stsToken, pathStyle, allowInsecure, bucket, objectPath, []byte(encryptionKey))
+							_, err = send.ToS3(endpoint, regin, username, password, stsToken, pathStyle, allowInsecure, bucket, objectPath, []byte(encryptionKey))
 							if err != nil {
 								return err
 							}
@@ -227,9 +240,9 @@ func main() {
 					},
 					Action: func(ctx context.Context, cmd *cli.Command) (err error) {
 						if interval != 0 {
-							webdav.SendRequestLoop(endpoint, username, password, allowInsecure, filepath, []byte(encryptionKey), interval)
+							send.ToWebDAVLoop(endpoint, username, password, allowInsecure, filepath, []byte(encryptionKey), interval)
 						} else {
-							_, err = webdav.SendRequest(endpoint, username, password, allowInsecure, filepath, []byte(encryptionKey))
+							_, err = send.ToWebDAV(endpoint, username, password, allowInsecure, filepath, []byte(encryptionKey))
 							if err != nil {
 								return err
 							}
@@ -237,6 +250,233 @@ func main() {
 						return nil
 					},
 				},
+			},
+		},
+		{
+			Name:    "receive",
+			Aliases: []string{"r"},
+			Usage:   "receive wireguard endpoint from network information",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:        "remote_interface",
+					Aliases:     []string{"r"},
+					Usage:       "set remote interface",
+					Required:    true,
+					Destination: &remoteInterface,
+				},
+				&cli.StringFlag{
+					Name:        "wg_interface",
+					Aliases:     []string{"wi"},
+					Usage:       "set wireguard interface",
+					Required:    true,
+					Destination: &wgInterface,
+				},
+				&cli.StringFlag{
+					Name:        "wg_peer_key",
+					Aliases:     []string{"wk"},
+					Usage:       "set wireguard peer key",
+					Destination: &wgPeerKey,
+				},
+				&cli.DurationFlag{
+					Name:        "interval",
+					Aliases:     []string{"i"},
+					Usage:       "set send interval",
+					Destination: &interval,
+				},
+			},
+
+			Commands: []*cli.Command{
+				{
+					Name:  "file",
+					Usage: "receive network information from filesystem",
+					Flags: []cli.Flag{
+						&cli.StringFlag{
+							Name:        "filepath",
+							Aliases:     []string{"f"},
+							Usage:       "set file path",
+							Required:    true,
+							Destination: &filepath,
+						},
+						&cli.StringFlag{
+							Name:        "encryption_key",
+							Aliases:     []string{"e"},
+							Usage:       "set file encryption key",
+							Destination: &encryptionKey,
+						},
+					},
+					Action: func(ctx context.Context, cmd *cli.Command) (err error) {
+						if interval != 0 {
+							receive.FromFileLoop(filepath, []byte(encryptionKey), remoteInterface, wgInterface, wgPeerKey, interval)
+						} else {
+							err := receive.FromFile(filepath, []byte(encryptionKey), remoteInterface, wgInterface, wgPeerKey)
+							if err != nil {
+								return err
+							}
+						}
+						return nil
+					},
+				},
+				{
+					Name:  "s3",
+					Usage: "receive network information from s3 server",
+					Flags: []cli.Flag{
+						&cli.BoolFlag{
+							Name:        "allow_insecure",
+							Usage:       "set allow insecure connect",
+							Value:       false,
+							Destination: &allowInsecure,
+						},
+						&cli.StringFlag{
+							Name:        "encryption_key",
+							Aliases:     []string{"e"},
+							Usage:       "set file encryption key",
+							Destination: &encryptionKey,
+						},
+						&cli.StringFlag{
+							Name:        "endpoint",
+							Usage:       "set s3 server endpoint",
+							Required:    true,
+							Destination: &endpoint,
+						},
+						&cli.StringFlag{
+							Name:        "regin",
+							Usage:       "set s3 server regin",
+							Value:       "us-east-1",
+							Destination: &regin,
+						},
+						&cli.StringFlag{
+							Name:        "access_key_id",
+							Usage:       "set s3 server access key id",
+							Required:    true,
+							Destination: &username,
+						},
+						&cli.StringFlag{
+							Name:        "secret_access_key",
+							Usage:       "set s3 server secret access key",
+							Required:    true,
+							Destination: &password,
+						},
+						&cli.StringFlag{
+							Name:        "sts_token",
+							Usage:       "set s3 server sts token",
+							Destination: &stsToken,
+						},
+						&cli.BoolFlag{
+							Name:        "path_style",
+							Usage:       "set s3 server path style, false: virtual host, true: path",
+							Value:       false,
+							Destination: &pathStyle,
+						},
+						&cli.StringFlag{
+							Name:        "bucket",
+							Usage:       "set s3 server bucket",
+							Required:    true,
+							Destination: &bucket,
+						},
+						&cli.StringFlag{
+							Name:        "object_path",
+							Usage:       "set s3 server object path",
+							Required:    true,
+							Destination: &objectPath,
+						},
+					},
+					Action: func(ctx context.Context, cmd *cli.Command) (err error) {
+						if interval != 0 {
+							receive.FromS3Loop(endpoint, regin, username, password, stsToken, pathStyle, allowInsecure, bucket, objectPath, []byte(encryptionKey), remoteInterface, wgInterface, wgPeerKey, interval)
+						} else {
+							err = receive.FromS3(endpoint, regin, username, password, stsToken, pathStyle, allowInsecure, bucket, objectPath, []byte(encryptionKey), remoteInterface, wgInterface, wgPeerKey)
+							if err != nil {
+								return err
+							}
+						}
+						return nil
+					},
+				},
+				{
+					Name:  "webdav",
+					Usage: "receive network information from webdav server",
+					Flags: []cli.Flag{
+						&cli.BoolFlag{
+							Name:        "allow_insecure",
+							Usage:       "set allow insecure connect",
+							Value:       false,
+							Destination: &allowInsecure,
+						},
+						&cli.StringFlag{
+							Name:        "encryption_key",
+							Aliases:     []string{"e"},
+							Usage:       "set file encryption key",
+							Destination: &encryptionKey,
+						},
+						&cli.StringFlag{
+							Name:        "endpoint",
+							Usage:       "set webdav server endpoint",
+							Required:    true,
+							Destination: &endpoint,
+						},
+						&cli.StringFlag{
+							Name:        "username",
+							Usage:       "set webdav server username",
+							Destination: &username,
+						},
+						&cli.StringFlag{
+							Name:        "password",
+							Usage:       "set webdav server password",
+							Destination: &password,
+						},
+						&cli.StringFlag{
+							Name:        "filepath",
+							Aliases:     []string{"f"},
+							Usage:       "set webdav server filepath",
+							Required:    true,
+							Destination: &filepath,
+						},
+					},
+					Action: func(ctx context.Context, cmd *cli.Command) (err error) {
+						if interval != 0 {
+							receive.FromWebDAVLoop(endpoint, username, password, allowInsecure, filepath, []byte(encryptionKey), remoteInterface, wgInterface, wgPeerKey, interval)
+						} else {
+							err = receive.FromWebDAV(endpoint, username, password, allowInsecure, filepath, []byte(encryptionKey), remoteInterface, wgInterface, wgPeerKey)
+							if err != nil {
+								return err
+							}
+						}
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:    "decrypt",
+			Aliases: []string{"d"},
+			Usage:   "decrypt a file",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:        "filepath",
+					Aliases:     []string{"f"},
+					Usage:       "set file path",
+					Required:    true,
+					Destination: &filepath,
+				},
+				&cli.StringFlag{
+					Name:        "encryption_key",
+					Aliases:     []string{"e"},
+					Usage:       "set file encryption key",
+					Required:    true,
+					Destination: &encryptionKey,
+				},
+			},
+			Action: func(ctx context.Context, cmd *cli.Command) (err error) {
+				bytes, err := os.ReadFile(filepath)
+				if err != nil {
+					return err
+				}
+				plaintext, err := preload.Decrypt(bytes, []byte(encryptionKey))
+				if err != nil {
+					return err
+				}
+				fmt.Println(string(plaintext))
+				return nil
 			},
 		},
 	}
@@ -248,7 +488,7 @@ func main() {
 
 	cmd := &cli.Command{
 		Usage:    "Network information manager",
-		Version:  "v3.20",
+		Version:  "v3.30",
 		Commands: cmds,
 	}
 
