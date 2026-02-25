@@ -3,14 +3,15 @@ Description=IP Sync Sender
 After=network.target network-online.target
 
 [Service]
-Environment="I_ENDPOINT=xxx"
-Environment="I_USERNAME=xxx"
-Environment="I_PASSWORD=xxx"
-Environment="I_FILEPATH=xxx"
-Environment="I_ENCRYPTION_KEY=xxx"
+Environment=KEY=""
+Environment=INTERVAL=""
+Environment=WEBDAV_ENDPOINT=""
+Environment=WEBDAV_USERNAME=""
+Environment=WEBDAV_PASSWORD=""
+Environment=WEBDAV_PATH=""
 Type=oneshot
 User=root
-ExecStart=/usr/local/bin/ipsync send webdav -endpoint=${N_ENDPOINT} -username=${N_USERNAME} -password=${N_PASSWORD} -filepath=${N_FILEPATH} -encryption_key=${N_ENCRYPTION_KEY}
+ExecStart=/usr/local/bin/ipsync send webdav
 
 [Install]
 WantedBy=multi-user.target

@@ -4,15 +4,8 @@ START=90
 STOP=01
 USE_PROCD=1
 
-I_REMOTE_INTERFACE="xxx"
-I_WG_INTERFACE="xxx"
-I_ENDPOINT="xxx"
-I_ACCESS_KEY_ID="xxx"
-I_SECRET_ACCESS_KEY="xxx"
-I_BUCKET="xxx"
-I_OBJECT_PATH="xxx"
-I_ENCRYPTION_KEY="xxx"
-I_INTERVAL="5m"
+export KEY=""
+export INTERVAL=""
 
 service_data() {
   echo "ipsync is starting up..."
@@ -20,8 +13,21 @@ service_data() {
 
 start_service() {
   procd_open_instance
+
+  # env
+  procd_set_param env KEY=""
+  procd_append_param env INTERVAL=""
+  procd_append_param env WG_REMOTE_INTERFACE=""
+  procd_append_param env WG_INTERFACE=""
+  procd_append_param env S3_ENDPOINT=""
+  procd_append_param env S3_ACCESS_KEY_ID=""
+  procd_append_param env S3_SECRET_ACCESS_KEY=""
+  procd_append_param env S3_PATH_STYLE=true
+  procd_append_param env S3_BUCKET=""
+  procd_append_param env S3_OBJECT_PATH=""
+
   procd_set_param command /usr/local/bin/ipsync
-  procd_append_param command watchdog -encryption_key=${I_ENCRYPTION_KEY} -interval=${I_INTERVAL} -remote_interface=${I_REMOTE_INTERFACE} -wg_interface=${I_WG_INTERFACE} s3 -endpoint=${I_ENDPOINT} -access_key_id=${I_ACCESS_KEY_ID} -secret_access_key=${I_SECRET_ACCESS_KEY} -path_style -bucket=${I_BUCKET} -object_path=${I_OBJECT_PATH}
+  procd_append_param command watchdog s3
   procd_set_param pidfile /var/run/ipsync.pid
   procd_set_param stdout 1
   procd_set_param stderr 1

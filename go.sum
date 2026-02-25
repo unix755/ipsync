@@ -48,8 +48,8 @@ github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
 github.com/tink-crypto/tink-go/v2 v2.6.0 h1:+KHNBHhWH33Vn+igZWcsgdEPUxKwBMEe0QC60t388v4=
 github.com/tink-crypto/tink-go/v2 v2.6.0/go.mod h1:2WbBA6pfNsAfBwDCggboaHeB2X29wkU8XHtGwh2YIk8=
-github.com/unix755/xtools v1.1.6 h1:vKwY9hk7HJ3dEXtJFSGdSg4i/6wPReIPbI+4eTw+NT4=
-github.com/unix755/xtools v1.1.6/go.mod h1:qkFZ9kXI15PiHpesNC3tpqVnpDrkCJDVTK5ntagqQII=
+github.com/unix755/xtools v1.1.7-0.20260225130013-1349292f852b h1:TMjvefxZ9d3TyIfNNoK9gmpZw9nC6gEXUIeLWoYGoms=
+github.com/unix755/xtools v1.1.7-0.20260225130013-1349292f852b/go.mod h1:qkFZ9kXI15PiHpesNC3tpqVnpDrkCJDVTK5ntagqQII=
 github.com/urfave/cli/v3 v3.6.2 h1:lQuqiPrZ1cIz8hz+HcrG0TNZFxU70dPZ3Yl+pSrH9A8=
 github.com/urfave/cli/v3 v3.6.2/go.mod h1:ysVLtOEmg2tOy6PknnYVhDoouyC/6N42TMeoMzskhso=
 golang.org/x/crypto v0.48.0 h1:/VRzVqiRSggnhY7gNRxPauEQ5Drw9haKdM0jqfcCFts=

@@ -1,18 +1,19 @@
 [Unit]
-Description=IP Sync Receiver
+Description=IP Sync Watchdog
 After=network.target network-online.target
 
 [Service]
-Environment="I_REMOTE_INTERFACE=xxx"
-Environment="I_WG_INTERFACE=xxx"
-Environment="I_ENDPOINT=xxx"
-Environment="I_USERNAME=xxx"
-Environment="I_PASSWORD=xxx"
-Environment="I_FILEPATH=xxx"
-Environment="I_ENCRYPTION_KEY=xxx"
+Environment=KEY=""
+Environment=INTERVAL=""
+Environment=WG_REMOTE_INTERFACE=""
+Environment=WG_INTERFACE=""
+Environment=WEBDAV_ENDPOINT=""
+Environment=WEBDAV_USERNAME=""
+Environment=WEBDAV_PASSWORD=""
+Environment=WEBDAV_PATH=""
 Type=oneshot
 User=root
-ExecStart=/usr/local/bin/ipsync receive -remote_interface=${W_REMOTE_INTERFACE} -wg_interface=${W_WG_INTERFACE} webdav -endpoint=${W_ENDPOINT} -username=${W_USERNAME} -password=${W_PASSWORD} -filepath=${W_FILEPATH} -encryption_key=${W_ENCRYPTION_KEY}
+ExecStart=/usr/local/bin/ipsync watchdog webdav
 
 [Install]
 WantedBy=multi-user.target

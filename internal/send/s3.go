@@ -10,7 +10,7 @@ import (
 	"github.com/unix755/xtools/xS3"
 )
 
-func ToS3(endpoint string, region string, accessKeyId string, secretAccessKey string, stsToken string, pathStyle bool, allowInsecure bool, bucket string, objectPath string, encryptionKey []byte) (location *string, err error) {
+func ToS3(endpoint string, region string, accessKeyId string, secretAccessKey string, stsToken string, pathStyle bool, skipTLSVerify bool, bucket string, objectPath string, encryptionKey []byte) (location *string, err error) {
 	// 获取负载
 	p, err := preload.NewPreload()
 	if err != nil {
@@ -23,7 +23,7 @@ func ToS3(endpoint string, region string, accessKeyId string, secretAccessKey st
 	}
 
 	// 使用 s3 协议上传负载
-	c := xS3.NewS3Client(endpoint, region, accessKeyId, secretAccessKey, stsToken, pathStyle, allowInsecure)
+	c := xS3.NewS3Client(endpoint, region, accessKeyId, secretAccessKey, stsToken, pathStyle, skipTLSVerify)
 	result, err := c.UploadObject(bucket, objectPath, bytes)
 	if err != nil {
 		return nil, err
@@ -31,7 +31,7 @@ func ToS3(endpoint string, region string, accessKeyId string, secretAccessKey st
 	return result.Location, nil
 }
 
-func ToS3Loop(endpoint string, region string, accessKeyId string, secretAccessKey string, stsToken string, pathStyle bool, allowInsecure bool, bucket string, objectPath string, encryptionKey []byte, interval time.Duration) {
+func ToS3Loop(endpoint string, region string, accessKeyId string, secretAccessKey string, stsToken string, pathStyle bool, skipTLSVerify bool, bucket string, objectPath string, encryptionKey []byte, interval time.Duration) {
 	for {
 		// 获取 preload
 		p, err := preload.NewPreload()
@@ -49,7 +49,7 @@ func ToS3Loop(endpoint string, region string, accessKeyId string, secretAccessKe
 
 		if string(bytes) != cacheNetInterfaces {
 			// 发送到文件
-			location, err := ToS3(endpoint, region, accessKeyId, secretAccessKey, stsToken, pathStyle, allowInsecure, bucket, objectPath, encryptionKey)
+			location, err := ToS3(endpoint, region, accessKeyId, secretAccessKey, stsToken, pathStyle, skipTLSVerify, bucket, objectPath, encryptionKey)
 			if err != nil {
 				log.Println(err)
 			} else {

@@ -1,5 +1,5 @@
 [Unit]
-Description=IP Sync Sender Timer
+Description=IP Sync Timer
 
 [Timer]
 Unit=ipsync.service

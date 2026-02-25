@@ -15,16 +15,14 @@ import (
 
 func main() {
 	// 文件加密 key
-	var encryptionKey string
+	var Key string
 	// 是否允许不安全连接(tls 自签证书)
-	var allowInsecure bool
+	var skipTLSVerify bool
 	// 启用循环, 每一次运行之前的时间间隔
 	var interval time.Duration
-	// 接收后保存到的文件
-	var toFile string
 
 	// file 模式下本地存储文件地址, webdav 模式下服务端存储文件地址
-	var filepath string
+	var path string
 
 	// s3 模式下服务器端点, webdav 模式下服务器端点
 	var endpoint string
@@ -49,107 +47,136 @@ func main() {
 	var (
 		CommonFlags = []cli.Flag{
 			&cli.StringFlag{
-				Name:        "encryption_key",
+				Name:        "key",
 				Aliases:     []string{"k"},
-				Usage:       "set encryption key",
-				Destination: &encryptionKey,
+				Usage:       "key used for encryption",
+				Value:       "",
+				Sources:     cli.EnvVars("KEY"),
+				Destination: &Key,
 			},
 			&cli.BoolFlag{
-				Name:        "allow_insecure",
-				Usage:       "set allow insecure connect",
+				Name:        "skipTLSVerify",
+				Aliases:     []string{"s"},
+				Usage:       "skip TLS verification in server connection",
 				Value:       false,
-				Destination: &allowInsecure,
+				Sources:     cli.EnvVars("SKIP_TLS_VERIFY"),
+				Destination: &skipTLSVerify,
 			},
 			&cli.DurationFlag{
 				Name:        "interval",
 				Aliases:     []string{"i"},
-				Usage:       "set interval",
+				Usage:       "interval between repetitive tasks",
+				Value:       0 * time.Second,
+				Sources:     cli.EnvVars("INTERVAL"),
 				Destination: &interval,
 			},
 		}
 
 		FileFlags = []cli.Flag{
 			&cli.StringFlag{
-				Name:        "filepath",
-				Aliases:     []string{"f"},
-				Usage:       "set file path",
+				Name:        "file_path",
+				Usage:       "file path used in file protocol",
 				Required:    true,
-				Destination: &filepath,
+				Value:       "",
+				Sources:     cli.EnvVars("FILE_PATH"),
+				Destination: &path,
 			},
 		}
 
 		S3Flags = []cli.Flag{
 			&cli.StringFlag{
-				Name:        "endpoint",
-				Usage:       "set s3 server endpoint",
+				Name:        "s3_endpoint",
+				Usage:       "endpoint used in s3 protocol",
 				Required:    true,
+				Value:       "",
+				Sources:     cli.EnvVars("S3_ENDPOINT"),
 				Destination: &endpoint,
 			},
 			&cli.StringFlag{
-				Name:        "region",
-				Usage:       "set s3 server region",
+				Name:        "s3_region",
+				Usage:       "region used in s3 protocol",
 				Value:       "us-east-1",
+				Sources:     cli.EnvVars("S3_REGION"),
 				Destination: &region,
 			},
 			&cli.StringFlag{
-				Name:        "access_key_id",
-				Usage:       "set s3 server access key id",
+				Name:        "s3_access_key_id",
+				Usage:       "access key id used in s3 protocol",
 				Required:    true,
+				Value:       "",
+				Sources:     cli.EnvVars("S3_ACCESS_KEY_ID"),
 				Destination: &username,
 			},
 			&cli.StringFlag{
-				Name:        "secret_access_key",
-				Usage:       "set s3 server secret access key",
+				Name:        "s3_secret_access_key",
+				Usage:       "secret access key used in s3 protocol",
 				Required:    true,
+				Value:       "",
+				Sources:     cli.EnvVars("S3_SECRET_ACCESS_KEY"),
 				Destination: &password,
 			},
 			&cli.StringFlag{
-				Name:        "sts_token",
-				Usage:       "set s3 server sts token",
+				Name:        "s3_sts_token",
+				Usage:       "sts token used in s3 protocol",
+				Value:       "",
+				Sources:     cli.EnvVars("S3_STS_TOKEN"),
 				Destination: &stsToken,
 			},
 			&cli.BoolFlag{
-				Name:        "path_style",
-				Usage:       "set s3 server path style, false: virtual host, true: path",
+				Name:        "s3_path_style",
+				Usage:       "path style used in s3 protocol",
 				Value:       false,
+				Sources:     cli.EnvVars("S3_PATH_STYLE"),
 				Destination: &pathStyle,
 			},
 			&cli.StringFlag{
-				Name:        "bucket",
-				Usage:       "set s3 server bucket",
+				Name:        "s3_bucket",
+				Usage:       "bucket used in s3 protocol",
 				Required:    true,
+				Value:       "",
+				Sources:     cli.EnvVars("S3_BUCKET"),
 				Destination: &bucket,
 			},
 			&cli.StringFlag{
-				Name:        "object_path",
-				Usage:       "set s3 server object path",
+				Name:        "s3_object_path",
+				Usage:       "object path used in s3 protocol",
 				Required:    true,
+				Value:       "",
+				Sources:     cli.EnvVars("S3_OBJECT_PATH"),
 				Destination: &objectPath,
 			},
 		}
 
 		WebDAVFlags = []cli.Flag{
 			&cli.StringFlag{
-				Name:        "endpoint",
-				Usage:       "set webdav server endpoint",
+				Name:        "webdav_endpoint",
+				Usage:       "endpoint used in webdav protocol",
 				Required:    true,
+				Value:       "",
+				Sources:     cli.EnvVars("WEBDAV_ENDPOINT"),
 				Destination: &endpoint,
 			},
 			&cli.StringFlag{
-				Name:        "username",
-				Usage:       "set webdav server username",
+				Name:        "webdav_username",
+				Usage:       "username used in webdav protocol",
+				Value:       "",
+				Sources:     cli.EnvVars("WEBDAV_USERNAME"),
 				Destination: &username,
 			},
 			&cli.StringFlag{
-				Name:        "password",
-				Usage:       "set webdav server password",
+				Name:        "webdav_password",
+				Usage:       "password used in webdav protocol",
+				Value:       "",
+				Sources:     cli.EnvVars("WEBDAV_PASSWORD"),
 				Destination: &password,
 			},
 			&cli.StringFlag{
-				Name:        "filepath",
-				Usage:       "set webdav server filepath",
+				Name:        "webdav_path",
+				Usage:       "path used in webdav protocol",
 				Required:    true,
-				Destination: &filepath,
+				Value:       "",
+				Sources:     cli.EnvVars("WEBDAV_PATH"),
+				Destination: &path,
 			},
 		}
 	)
@@ -158,18 +185,18 @@ func main() {
 		{
 			Name:    "send",
 			Aliases: []string{"s"},
-			Usage:   "send network information",
+			Usage:   "send network information to a remote server as a file",
 			Flags:   CommonFlags,
 			Commands: []*cli.Command{
 				{
 					Name:  "file",
-					Usage: "send to filesystem",
+					Usage: "send to local filesystem",
 					Flags: FileFlags,
 					Action: func(ctx context.Context, cmd *cli.Command) (err error) {
 						if interval != 0 {
-							send.ToFileLoop(filepath, []byte(encryptionKey), interval)
+							send.ToFileLoop(path, []byte(Key), interval)
 						} else {
-							return send.ToFile(filepath, []byte(encryptionKey))
+							return send.ToFile(path, []byte(Key))
 						}
 						return nil
 					},
@@ -180,9 +207,9 @@ func main() {
 					Flags: S3Flags,
 					Action: func(ctx context.Context, cmd *cli.Command) (err error) {
 						if interval != 0 {
-							send.ToS3Loop(endpoint, region, username, password, stsToken, pathStyle, allowInsecure, bucket, objectPath, []byte(encryptionKey), interval)
+							send.ToS3Loop(endpoint, region, username, password, stsToken, pathStyle, skipTLSVerify, bucket, objectPath, []byte(Key), interval)
 						} else {
-							_, err = send.ToS3(endpoint, region, username, password, stsToken, pathStyle, allowInsecure, bucket, objectPath, []byte(encryptionKey))
+							_, err = send.ToS3(endpoint, region, username, password, stsToken, pathStyle, skipTLSVerify, bucket, objectPath, []byte(Key))
 							if err != nil {
 								return err
 							}
@@ -196,9 +223,9 @@ func main() {
 					Flags: WebDAVFlags,
 					Action: func(ctx context.Context, cmd *cli.Command) (err error) {
 						if interval != 0 {
-							send.ToWebDAVLoop(endpoint, username, password, allowInsecure, filepath, []byte(encryptionKey), interval)
+							send.ToWebDAVLoop(endpoint, username, password, skipTLSVerify, path, []byte(Key), interval)
 						} else {
-							_, err = send.ToWebDAV(endpoint, username, password, allowInsecure, filepath, []byte(encryptionKey))
+							_, err = send.ToWebDAV(endpoint, username, password, skipTLSVerify, path, []byte(Key))
 							if err != nil {
 								return err
 							}
@@ -209,86 +236,35 @@ func main() {
 			},
 		},
 		{
-			Name:    "receive",
-			Aliases: []string{"r"},
-			Usage:   "receive network information",
-			Flags: append(CommonFlags,
-				&cli.StringFlag{
-					Name:        "to_file",
-					Aliases:     []string{"t"},
-					Usage:       "set save to file",
-					Destination: &toFile,
-				}),
-			Commands: []*cli.Command{
-				{
-					Name:  "file",
-					Usage: "receive from filesystem",
-					Flags: FileFlags,
-					Action: func(ctx context.Context, cmd *cli.Command) (err error) {
-						// 获取 preload
-						p, err := receive.FromFile(filepath, []byte(encryptionKey))
-						if err != nil {
-							return err
-						}
-						// 保存为明文, 或者打印明文
-						return p.SaveToFileOrPrint(toFile, []byte{})
-					},
-				},
-				{
-					Name:  "s3",
-					Usage: "receive from s3 server",
-					Flags: S3Flags,
-					Action: func(ctx context.Context, cmd *cli.Command) (err error) {
-						// 获取 preload
-						p, err := receive.FromS3(endpoint, region, username, password, stsToken, pathStyle, allowInsecure, bucket, objectPath, []byte(encryptionKey))
-						if err != nil {
-							return err
-						}
-						// 保存为明文, 或者打印明文
-						return p.SaveToFileOrPrint(toFile, []byte{})
-					},
-				},
-				{
-					Name:  "webdav",
-					Usage: "receive network information from webdav server",
-					Flags: WebDAVFlags,
-					Action: func(ctx context.Context, cmd *cli.Command) (err error) {
-						// 获取 preload
-						p, err := receive.FromWebDAV(endpoint, username, password, allowInsecure, filepath, []byte(encryptionKey))
-						if err != nil {
-							return err
-						}
-						// 保存为明文, 或者打印明文
-						return p.SaveToFileOrPrint(toFile, []byte{})
-					},
-				},
-			},
-		},
-		{
 			Name:    "print",
 			Aliases: []string{"p"},
-			Usage:   "print network information",
+			Usage:   "print network information from a file or local host.",
 			Flags: []cli.Flag{
 				&cli.StringFlag{
-					Name:        "filepath",
-					Aliases:     []string{"f"},
-					Usage:       "set file path",
-					Destination: &filepath,
+					Name:        "path",
+					Aliases:     []string{"p"},
+					Usage:       "file path used for printing network information",
+					Value:       "",
+					Sources:     cli.EnvVars("PRINT_PATH"),
+					Destination: &path,
 				},
 				&cli.StringFlag{
-					Name:        "encryption_key",
+					Name:        "key",
 					Aliases:     []string{"k"},
-					Usage:       "set file encryption key",
-					Destination: &encryptionKey,
+					Usage:       "key used for encryption",
+					Value:       "",
+					Sources:     cli.EnvVars("PRINT_KEY"),
+					Destination: &Key,
 				},
 			},
 			Action: func(ctx context.Context, cmd *cli.Command) (err error) {
-				if filepath != "" {
-					bytes, err := os.ReadFile(filepath)
+				// 提供路径则从文件中解码 preload 并打印, 不提供则打印本机 preload
+				if path != "" {
+					bytes, err := os.ReadFile(path)
 					if err != nil {
 						return err
 					}
-					plaintext, err := preload.Decrypt(bytes, []byte(encryptionKey))
+					plaintext, err := preload.Decrypt(bytes, []byte(Key))
 					if err != nil {
 						return err
 					}
@@ -298,7 +274,7 @@ func main() {
 					if err != nil {
 						return err
 					}
-					bytes, err := preload.Marshal(p, "json", []byte(encryptionKey))
+					bytes, err := preload.Marshal(p, "json", []byte(Key))
 					if err != nil {
 						return err
 					}
@@ -310,26 +286,29 @@ func main() {
 		{
 			Name:    "watchdog",
 			Aliases: []string{"w"},
-			Usage:   "wireguard watchdog",
+			Usage:   "watchdog used to change the WireGuard endpoint.",
 			Flags: append(CommonFlags,
 				&cli.StringFlag{
-					Name:        "remote_interface",
-					Aliases:     []string{"r"},
-					Usage:       "set remote interface",
+					Name:        "wg_remote_interface",
+					Usage:       "remote interface used WireGuard watchdog",
 					Required:    true,
+					Value:       "",
+					Sources:     cli.EnvVars("WG_REMOTE_INTERFACE"),
 					Destination: &remoteInterface,
 				},
 				&cli.StringFlag{
 					Name:        "wg_interface",
-					Aliases:     []string{"wi"},
-					Usage:       "set wireguard interface",
+					Usage:       "interface used WireGuard watchdog",
 					Required:    true,
+					Value:       "",
+					Sources:     cli.EnvVars("WG_INTERFACE"),
 					Destination: &wgInterface,
 				},
 				&cli.StringFlag{
 					Name:        "wg_peer_key",
-					Aliases:     []string{"wk"},
-					Usage:       "set wireguard peer key",
+					Usage:       "peer key used WireGuard watchdog",
+					Value:       "",
+					Sources:     cli.EnvVars("WG_PEER_KEY"),
 					Destination: &wgPeerKey,
 				}),
 			Commands: []*cli.Command{
@@ -339,7 +318,7 @@ func main() {
 					Flags: FileFlags,
 					Action: func(ctx context.Context, cmd *cli.Command) (err error) {
 						// 获取 preload
-						p, err := receive.FromFile(filepath, []byte(encryptionKey))
+						p, err := receive.FromFile(path, []byte(Key))
 						if err != nil {
 							return err
 						}
@@ -352,7 +331,7 @@ func main() {
 					Flags: S3Flags,
 					Action: func(ctx context.Context, cmd *cli.Command) (err error) {
 						// 获取 preload
-						p, err := receive.FromS3(endpoint, region, username, password, stsToken, pathStyle, allowInsecure, bucket, objectPath, []byte(encryptionKey))
+						p, err := receive.FromS3(endpoint, region, username, password, stsToken, pathStyle, skipTLSVerify, bucket, objectPath, []byte(Key))
 						if err != nil {
 							return err
 						}
@@ -361,11 +340,11 @@ func main() {
 				},
 				{
 					Name:  "webdav",
-					Usage: "receive network information from webdav server",
+					Usage: "receive from webdav server",
 					Flags: WebDAVFlags,
 					Action: func(ctx context.Context, cmd *cli.Command) (err error) {
 						// 获取 preload
-						p, err := receive.FromWebDAV(endpoint, username, password, allowInsecure, filepath, []byte(encryptionKey))
+						p, err := receive.FromWebDAV(endpoint, username, password, skipTLSVerify, path, []byte(Key))
 						if err != nil {
 							return err
 						}
@@ -382,8 +361,8 @@ func main() {
 	}
 
 	cmd := &cli.Command{
-		Usage:    "IP Sync Tool",
-		Version:  "v3.31",
+		Usage:    "IP Sync Tool from https://github.com/unix755/ipsync",
+		Version:  "v3.33",
 		Commands: cmds,
 	}
 

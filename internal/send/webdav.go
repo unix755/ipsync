@@ -11,7 +11,7 @@ import (
 	"github.com/unix755/xtools/xWebDAV"
 )
 
-func ToWebDAV(endpoint string, username string, password string, allowInsecure bool, filepath string, encryptionKey []byte) (resp *http.Response, err error) {
+func ToWebDAV(endpoint string, username string, password string, skipTLSVerify bool, filepath string, encryptionKey []byte) (resp *http.Response, err error) {
 	// 获取负载
 	p, err := preload.NewPreload()
 	if err != nil {
@@ -23,7 +23,7 @@ func ToWebDAV(endpoint string, username string, password string, allowInsecure b
 		return nil, err
 	}
 
-	client, err := xWebDAV.NewClient(endpoint, username, password, allowInsecure)
+	client, err := xWebDAV.NewClient(endpoint, username, password, skipTLSVerify)
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +31,7 @@ func ToWebDAV(endpoint string, username string, password string, allowInsecure b
 	return client.Upload(filepath, bytes)
 }
 
-func ToWebDAVLoop(endpoint string, username string, password string, allowInsecure bool, filepath string, encryptionKey []byte, interval time.Duration) {
+func ToWebDAVLoop(endpoint string, username string, password string, skipTLSVerify bool, filepath string, encryptionKey []byte, interval time.Duration) {
 	for {
 		// 获取 preload
 		p, err := preload.NewPreload()
@@ -49,7 +49,7 @@ func ToWebDAVLoop(endpoint string, username string, password string, allowInsecu
 
 		if string(bytes) != cacheNetInterfaces {
 			// 发送到文件
-			resp, err := ToWebDAV(endpoint, username, password, allowInsecure, filepath, encryptionKey)
+			resp, err := ToWebDAV(endpoint, username, password, skipTLSVerify, filepath, encryptionKey)
 			if err != nil {
 				log.Println(err)
 			} else {
