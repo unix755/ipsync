@@ -1,5 +1,5 @@
 [Unit]
-Description=WireGuard Watchdog Webdav Receiver
+Description=IP Sync Receiver
 After=network.target network-online.target
 
 [Service]
@@ -12,7 +12,7 @@ Environment="W_FILEPATH=xxx"
 Environment="W_ENCRYPTION_KEY=xxx"
 Type=oneshot
 User=root
-ExecStart=/usr/local/bin/wgwd get -remote_interface=${W_REMOTE_INTERFACE} -wg_interface=${W_WG_INTERFACE} webdav -endpoint=${W_ENDPOINT} -username=${W_USERNAME} -password=${W_PASSWORD} -filepath=${W_FILEPATH} -encryption_key=${W_ENCRYPTION_KEY}
+ExecStart=/usr/local/bin/ipsync receive -remote_interface=${W_REMOTE_INTERFACE} -wg_interface=${W_WG_INTERFACE} webdav -endpoint=${W_ENDPOINT} -username=${W_USERNAME} -password=${W_PASSWORD} -filepath=${W_FILEPATH} -encryption_key=${W_ENCRYPTION_KEY}
 
 [Install]
 WantedBy=multi-user.target

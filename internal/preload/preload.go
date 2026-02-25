@@ -3,7 +3,7 @@ package preload
 import (
 	"encoding/json"
 	"encoding/xml"
-	"netinfo/internal/network"
+	"ipsync/internal/network"
 	"time"
 )
 

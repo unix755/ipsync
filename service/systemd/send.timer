@@ -1,8 +1,8 @@
 [Unit]
-Description=WireGuard Watchdog Receiver Timer
+Description=IP Sync Sender Timer
 
 [Timer]
-Unit=wgwd.service
+Unit=ipsync.service
 OnBootSec=10s
 OnUnitActiveSec=5m
 Persistent=true

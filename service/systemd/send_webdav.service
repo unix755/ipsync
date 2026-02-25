@@ -1,5 +1,5 @@
 [Unit]
-Description=NetInfo Webdav Sender
+Description=IP Sync Sender
 After=network.target network-online.target
 
 [Service]
@@ -10,7 +10,7 @@ Environment="N_FILEPATH=xxx"
 Environment="N_ENCRYPTION_KEY=xxx"
 Type=oneshot
 User=root
-ExecStart=/usr/local/bin/netinfo send webdav -endpoint=${N_ENDPOINT} -username=${N_USERNAME} -password=${N_PASSWORD} -filepath=${N_FILEPATH} -encryption_key=${N_ENCRYPTION_KEY}
+ExecStart=/usr/local/bin/ipsync send webdav -endpoint=${N_ENDPOINT} -username=${N_USERNAME} -password=${N_PASSWORD} -filepath=${N_FILEPATH} -encryption_key=${N_ENCRYPTION_KEY}
 
 [Install]
 WantedBy=multi-user.target

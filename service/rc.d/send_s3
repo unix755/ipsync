@@ -1,11 +1,11 @@
 #!/bin/sh
-# PROVIDE: netinfo
+# PROVIDE: ipsync
 # REQUIRE: DAEMON NETWORKING
 
 . /etc/rc.subr
-name=netinfo
+name=ipsync
 rcvar=${name}_enable
-command="/usr/local/bin/netinfo"
+command="/usr/local/bin/ipsync"
 pidfile="/var/run/${name}.pid"
 start_cmd="${name}_start"
 
@@ -18,7 +18,7 @@ N_OBJECT_PATH="xxx"
 N_ENCRYPTION_KEY="xxx"
 N_INTERVAL="5m"
 
-netinfo_start() {
+ipsync_start() {
   echo "Starting ${name}."
   /usr/sbin/daemon -cf -p ${pidfile} ${command} send s3 -endpoint=${N_ENDPOINT} -path_style -access_key_id=${N_ACCESS_KEY_ID} -secret_access_key=${N_SECRET_ACCESS_KEY} -bucket=${N_BUCKET} -object_path=${N_OBJECT_PATH} -encryption_key=${N_ENCRYPTION_KEY} -interval=${N_INTERVAL}
 }

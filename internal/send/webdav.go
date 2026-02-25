@@ -1,9 +1,9 @@
 package send
 
 import (
+	"ipsync/internal/preload"
 	"log"
 	"net/http"
-	"netinfo/internal/preload"
 	"time"
 
 	"github.com/unix755/xtools/xWebDAV"

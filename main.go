@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"ipsync/internal/network"
+	"ipsync/internal/preload"
+	"ipsync/internal/receive"
+	"ipsync/internal/send"
 	"log"
-	"netinfo/internal/network"
-	"netinfo/internal/preload"
-	"netinfo/internal/receive"
-	"netinfo/internal/send"
 	"os"
 	"time"
 
@@ -43,42 +43,6 @@ func main() {
 	var wgPeerKey string
 
 	cmds := []*cli.Command{
-		{
-			Name:  "show",
-			Usage: "show all network information",
-			Flags: []cli.Flag{
-				&cli.BoolFlag{
-					Name:        "preload",
-					Aliases:     []string{"p"},
-					Usage:       "show preload information",
-					Value:       false,
-					Destination: &showPreload,
-				},
-			},
-			Action: func(ctx context.Context, cmd *cli.Command) (err error) {
-				var bytes []byte
-				var netInterfaces []network.NetInterface
-
-				if showPreload {
-					// 获取负载
-					p, err := preload.NewPreload()
-					if err != nil {
-						return err
-					}
-					// 负载转换为比特流
-					bytes, err = preload.Marshal(p, "json", nil)
-					if err != nil {
-						return err
-					}
-				} else {
-					netInterfaces, err = network.GetNetInterfaces()
-					bytes, err = json.Marshal(netInterfaces)
-				}
-
-				fmt.Println(string(bytes))
-				return err
-			},
-		},
 		{
 			Name:    "send",
 			Aliases: []string{"s"},
@@ -305,15 +269,14 @@ func main() {
 						},
 					},
 					Action: func(ctx context.Context, cmd *cli.Command) (err error) {
-						if interval != 0 {
-							receive.FromFileLoop(filepath, []byte(encryptionKey), remoteInterface, wgInterface, wgPeerKey, interval)
-						} else {
-							err := receive.FromFile(filepath, []byte(encryptionKey), remoteInterface, wgInterface, wgPeerKey)
-							if err != nil {
-								return err
-							}
+						// 获取 preload
+						p, err := receive.FromFile(filepath, []byte(encryptionKey))
+						if err != nil {
+							return err
 						}
-						return nil
+
+						// 更新 wireguard endpoint
+						return p.UpdateWireGuardEndPoint(remoteInterface, wgInterface, wgPeerKey, -1, interval)
 					},
 				},
 				{
@@ -381,15 +344,14 @@ func main() {
 						},
 					},
 					Action: func(ctx context.Context, cmd *cli.Command) (err error) {
-						if interval != 0 {
-							receive.FromS3Loop(endpoint, regin, username, password, stsToken, pathStyle, allowInsecure, bucket, objectPath, []byte(encryptionKey), remoteInterface, wgInterface, wgPeerKey, interval)
-						} else {
-							err = receive.FromS3(endpoint, regin, username, password, stsToken, pathStyle, allowInsecure, bucket, objectPath, []byte(encryptionKey), remoteInterface, wgInterface, wgPeerKey)
-							if err != nil {
-								return err
-							}
+						// 获取 preload
+						p, err := receive.FromS3(endpoint, regin, username, password, stsToken, pathStyle, allowInsecure, bucket, objectPath, []byte(encryptionKey))
+						if err != nil {
+							return err
 						}
-						return nil
+
+						// 更新 wireguard endpoint
+						return p.UpdateWireGuardEndPoint(remoteInterface, wgInterface, wgPeerKey, -1, interval)
 					},
 				},
 				{
@@ -433,17 +395,52 @@ func main() {
 						},
 					},
 					Action: func(ctx context.Context, cmd *cli.Command) (err error) {
-						if interval != 0 {
-							receive.FromWebDAVLoop(endpoint, username, password, allowInsecure, filepath, []byte(encryptionKey), remoteInterface, wgInterface, wgPeerKey, interval)
-						} else {
-							err = receive.FromWebDAV(endpoint, username, password, allowInsecure, filepath, []byte(encryptionKey), remoteInterface, wgInterface, wgPeerKey)
-							if err != nil {
-								return err
-							}
+						// 获取 preload
+						p, err := receive.FromWebDAV(endpoint, username, password, allowInsecure, filepath, []byte(encryptionKey))
+						if err != nil {
+							return err
 						}
-						return nil
+
+						// 更新 wireguard endpoint
+						return p.UpdateWireGuardEndPoint(remoteInterface, wgInterface, wgPeerKey, -1, interval)
 					},
 				},
+			},
+		},
+		{
+			Name:  "show",
+			Usage: "show all network information",
+			Flags: []cli.Flag{
+				&cli.BoolFlag{
+					Name:        "preload",
+					Aliases:     []string{"p"},
+					Usage:       "show preload information",
+					Value:       false,
+					Destination: &showPreload,
+				},
+			},
+			Action: func(ctx context.Context, cmd *cli.Command) (err error) {
+				var bytes []byte
+				var netInterfaces []network.NetInterface
+
+				if showPreload {
+					// 获取负载
+					p, err := preload.NewPreload()
+					if err != nil {
+						return err
+					}
+					// 负载转换为比特流
+					bytes, err = preload.Marshal(p, "json", nil)
+					if err != nil {
+						return err
+					}
+				} else {
+					netInterfaces, err = network.GetNetInterfaces()
+					bytes, err = json.Marshal(netInterfaces)
+				}
+
+				fmt.Println(string(bytes))
+				return err
 			},
 		},
 		{
@@ -487,7 +484,7 @@ func main() {
 	}
 
 	cmd := &cli.Command{
-		Usage:    "Network information manager",
+		Usage:    "IP Sync Tool",
 		Version:  "v3.30",
 		Commands: cmds,
 	}

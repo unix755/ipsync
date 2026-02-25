@@ -15,4 +15,4 @@ set W_FILEPATH="xxx"
 set W_ENCRYPTION_KEY="xxx"
 set N_INTERVAL="5m"
 
-wgwd get -remote_interface=%W_REMOTE_INTERFACE% -wg_interface=%W_WG_INTERFACE% -interval=%N_INTERVAL% webdav -endpoint=%W_ENDPOINT% -username=%W_USERNAME% -password=%W_PASSWORD% -filepath=%W_FILEPATH% -encryption_key=%W_ENCRYPTION_KEY%
+ipsync receive -remote_interface=%W_REMOTE_INTERFACE% -wg_interface=%W_WG_INTERFACE% -interval=%N_INTERVAL% webdav -endpoint=%W_ENDPOINT% -username=%W_USERNAME% -password=%W_PASSWORD% -filepath=%W_FILEPATH% -encryption_key=%W_ENCRYPTION_KEY%

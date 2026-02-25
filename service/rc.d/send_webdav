@@ -1,11 +1,11 @@
 #!/bin/sh
-# PROVIDE: netinfo
+# PROVIDE: ipsync
 # REQUIRE: DAEMON NETWORKING
 
 . /etc/rc.subr
-name=netinfo
+name=ipsync
 rcvar=${name}_enable
-command="/usr/local/bin/netinfo"
+command="/usr/local/bin/ipsync"
 pidfile="/var/run/${name}.pid"
 start_cmd="${name}_start"
 
@@ -17,7 +17,7 @@ N_FILEPATH="xxx"
 N_ENCRYPTION_KEY="xxx"
 N_INTERVAL="5m"
 
-netinfo_start() {
+ipsync_start() {
   echo "Starting ${name}."
   /usr/sbin/daemon -cf -p ${pidfile} ${command} send webdav -endpoint=${N_ENDPOINT} -username=${N_USERNAME} -password=${N_PASSWORD} -filepath=${N_FILEPATH} -encryption_key=${N_ENCRYPTION_KEY} -interval=${N_INTERVAL}
 }

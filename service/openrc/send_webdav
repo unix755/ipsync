@@ -8,7 +8,7 @@ export N_FILEPATH="xxx"
 export N_ENCRYPTION_KEY="xxx"
 export N_INTERVAL="5m"
 
-command="/usr/local/bin/netinfo"
+command="/usr/local/bin/ipsync"
 command_args="send webdav -endpoint=${N_ENDPOINT} -username=${N_USERNAME} -password=${N_PASSWORD} -filepath=${N_FILEPATH} -encryption_key=${N_ENCRYPTION_KEY} -interval=${N_INTERVAL}"
 command_background=true
 command_user="root"

@@ -1,4 +1,4 @@
-module netinfo
+module ipsync
 
 go 1.25.4
 

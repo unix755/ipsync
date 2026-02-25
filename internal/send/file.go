@@ -1,8 +1,10 @@
 package send
 
 import (
+	"encoding/json"
+	"ipsync/internal/cache"
+	"ipsync/internal/preload"
 	"log"
-	"netinfo/internal/preload"
 	"os"
 	"time"
 )
@@ -23,12 +25,34 @@ func ToFile(file string, encryptionKey []byte) (err error) {
 
 func ToFileLoop(file string, encryptionKey []byte, interval time.Duration) {
 	for {
-		err := ToFile(file, encryptionKey)
+		// 获取 preload
+		p, err := preload.NewPreload()
 		if err != nil {
 			log.Println(err)
-		} else {
-			log.Printf("save file to %s\n", file)
 		}
+		// 获取网络界面
+		bytes, err := json.Marshal(p.NetInterfaces)
+		if err != nil {
+			log.Println(err)
+		}
+
+		// 获取缓存中的 net_interfaces
+		cacheNetInterfaces, _ := cache.Get("net_interfaces")
+
+		if string(bytes) != cacheNetInterfaces {
+			// 发送到文件
+			err = ToFile(file, encryptionKey)
+			if err != nil {
+				log.Println(err)
+			} else {
+				// 设置新的缓存 net_interfaces
+				cache.Set("net_interfaces", string(bytes))
+				log.Printf("new net interfaces found, save file to %s\n", file)
+			}
+		} else {
+			log.Println("new net interfaces not found, skip")
+		}
+
 		time.Sleep(interval)
 	}
 }

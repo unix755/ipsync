@@ -1,8 +1,8 @@
 package send
 
 import (
+	"ipsync/internal/preload"
 	"log"
-	"netinfo/internal/preload"
 	"time"
 
 	"github.com/unix755/xtools/xS3"

@@ -16,4 +16,4 @@ set W_OBJECT_PATH="xxx"
 set W_ENCRYPTION_KEY="xxx"
 set N_INTERVAL="5m"
 
-wgwd get -remote_interface=%W_REMOTE_INTERFACE% -wg_interface=%W_WG_INTERFACE% -interval=%N_INTERVAL% s3 -endpoint=%W_ENDPOINT% -path_style -access_key_id=%W_ACCESS_KEY_ID% -secret_access_key=%W_SECRET_ACCESS_KEY% -bucket=%W_BUCKET% -object_path=%W_OBJECT_PATH% -encryption_key=%W_ENCRYPTION_KEY%
+ipsync receive -remote_interface=%W_REMOTE_INTERFACE% -wg_interface=%W_WG_INTERFACE% -interval=%N_INTERVAL% s3 -endpoint=%W_ENDPOINT% -path_style -access_key_id=%W_ACCESS_KEY_ID% -secret_access_key=%W_SECRET_ACCESS_KEY% -bucket=%W_BUCKET% -object_path=%W_OBJECT_PATH% -encryption_key=%W_ENCRYPTION_KEY%

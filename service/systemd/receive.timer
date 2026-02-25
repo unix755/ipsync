@@ -1,8 +1,8 @@
 [Unit]
-Description=NetInfo Sender Timer
+Description=IP Sync Receiver Timer
 
 [Timer]
-Unit=netinfo.service
+Unit=ipsync.service
 OnBootSec=10s
 OnUnitActiveSec=5m
 Persistent=true
