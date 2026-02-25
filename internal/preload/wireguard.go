@@ -38,7 +38,6 @@ func (p *Preload) UpdateWireGuardEndPoint(remoteInterface string, wgInterface st
 	} else {
 		// 获取到第一个公网 IP
 		ip, found := p.GetFirstPublicIP(remoteInterface)
-
 		if found {
 			err = wireguard.UpdateEndpoint(wgInterface, wgPeerKey, ip.String(), newEndpointPort)
 		}

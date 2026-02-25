@@ -106,7 +106,7 @@ func GetEndpointConfigByKey(wgInterface string, peerKey string) (endpointConfig 
 
 // GetEndpointConfigs 获取 endpointConfigs
 func GetEndpointConfigs(wgInterface string) (endpointConfigs []*EndpointConfig, err error) {
-	e, err := exec.Command("wg", "show", wgInterface, "endpoints").Output()
+	e, err := xExec.Output(exec.Command("wg", "show", wgInterface, "endpoints"))
 	if err != nil {
 		return nil, err
 	}

@@ -11,7 +11,7 @@ func UpdateEndpoint(wgInterface string, wgPeerKey string, newEndpointAddr string
 		// 获取单个 EndpointConfig
 		endpointConfig, err := GetEndpointConfigByKey(wgInterface, wgPeerKey)
 		if err != nil {
-			return fmt.Errorf("unable to get wireguard endpoint from interface %s using key %s\n%v", wgInterface, wgPeerKey, err)
+			return fmt.Errorf("unable to get wireguard endpoints from interface: %s key: %s, error: %v, maybe Permission denied", wgInterface, wgPeerKey, err)
 		}
 		err = endpointConfig.ApplyNewEndpointConfig(wgInterface, wgPeerKey, newEndpointAddr, newEndpointPort)
 		if err != nil {
@@ -21,7 +21,7 @@ func UpdateEndpoint(wgInterface string, wgPeerKey string, newEndpointAddr string
 		// 获取所有 EndpointConfig
 		endpointConfigs, err := GetEndpointConfigs(wgInterface)
 		if err != nil {
-			return fmt.Errorf("unable to get wireguard endpoints from interface %s\n%v", wgInterface, err)
+			return fmt.Errorf("unable to get wireguard endpoints from interface: %s, error: %v, maybe Permission denied", wgInterface, err)
 		}
 		for _, endpointConfig := range endpointConfigs {
 			err = endpointConfig.ApplyNewEndpointConfig(wgInterface, wgPeerKey, newEndpointAddr, newEndpointPort)
