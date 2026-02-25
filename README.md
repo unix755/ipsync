@@ -33,25 +33,8 @@ chmod +x /usr/local/bin/ipsync
 ```sh
 curl -Lo "/etc/systemd/system/ipsync.service" "https://github.com/unix755/ipsync/raw/main/service/systemd/send_webdav.service"
 systemctl enable ipsync.service && systemctl restart ipsync.service && systemctl status ipsync.service
-curl -Lo "/etc/systemd/system/ipsync.timer" "https://github.com/unix755/ipsync/raw/main/service/systemd/send.timer"
+curl -Lo "/etc/systemd/system/ipsync.timer" "https://github.com/unix755/ipsync/raw/main/service/systemd/ipsync.timer"
 systemctl enable ipsync.timer && systemctl restart ipsync.timer && systemctl status ipsync.timer
-```
-
-### Alpine Linux(openrc)
-
-```sh
-curl -Lo "/etc/init.d/ipsync" "https://github.com/unix755/ipsync/raw/main/service/openrc/send_webdav"
-chmod +x /etc/init.d/ipsync
-rc-update add ipsync && rc-service ipsync restart && rc-service ipsync status
-```
-
-### FreeBSD(rc.d)
-
-```sh
-mkdir /usr/local/etc/rc.d/
-curl -Lo "/usr/local/etc/rc.d/ipsync" "https://github.com/unix755/ipsync/raw/main/service/rc.d/send_webdav"
-chmod +x /usr/local/etc/rc.d/ipsync
-service ipsync enable && service ipsync restart && service ipsync status
 ```
 
 ### OpenWRT(init.d)
@@ -73,7 +56,7 @@ export CGO_ENABLED=0
 go build -v -trimpath -ldflags "-s -w"
 ```
 
-### For mipsle router
+### For mipsle openwrt router
 
 ```sh
 git clone https://github.com/unix755/ipsync.git
