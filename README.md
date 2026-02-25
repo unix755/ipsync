@@ -11,60 +11,7 @@
 ## Example
 
 ```sh
-# Show local network information
-ipsync show
-## Show send preload
-ipsync show -p
-
-# Send local network information to a file
-ipsync send file -filepath="./home.json"
-## Send local network information to a file and encrypt the file
-ipsync send file -filepath="./home.json" -encryption_key="admin123"
-## Send local network information to a file and encrypt the file every 5 min
-ipsync send file -filepath="./home.json" -encryption_key="admin123" -interval="5m"
-
-# Send local network information to s3 server
-ipsync send s3 -endpoint="https://s3.amazonaws.com" -access_key_id="admin" -secret_access_key="adminadmin" -bucket="storage" -object_path="home.json"
-## Send local network information to minio s3 server
-ipsync send s3 -endpoint="http://192.168.1.185:9000" -path_style -access_key_id="admin" -secret_access_key="adminadmin" -bucket="storage" -object_path="home.json"
-## Send local network information to minio s3 server and encrypt the file
-ipsync send s3 -endpoint="http://192.168.1.185:9000" -path_style -access_key_id="admin" -secret_access_key="adminadmin" -bucket="storage" -object_path="home.json" -encryption_key="admin123"
-## Send local network information to minio s3 server and encrypt the file every 5 min
-ipsync send s3 -endpoint="http://192.168.1.185:9000" -path_style -access_key_id="admin" -secret_access_key="adminadmin" -bucket="storage" -object_path="home.json" -encryption_key="admin123" -interval="5m"
-
-# Send local network information to webdav server
-ipsync send webdav -endpoint="http://192.168.1.2/" -filepath="/dav/home.json"
-## Send local network information to webdav server and encrypt the file
-ipsync send webdav -endpoint="http://192.168.1.2/" -filepath="/dav/home.json" -encryption_key="admin123"
-## Send local network information to webdav server and encrypt the file every 5 min
-ipsync send webdav -endpoint="http://192.168.1.2/" -filepath="/dav/home.json" -encryption_key="admin123" -interval="5m"
-
-
-# Receive local network information from a file
-ipsync receive -remote_interface="pppoe-wan" -wg_interface="wg0" file -filepath="./home.json"
-## Receive local network information from a file and decrypt the file
-ipsync receive -remote_interface="pppoe-wan" -wg_interface="wg0" file -filepath="./home.json" -encryption_key="admin123"
-## Receive local network information from a file and decrypt the file every 5 min
-ipsync receive -remote_interface="pppoe-wan" -wg_interface="wg0" -interval="5m" file -filepath="./home.json" -encryption_key="admin123"
-
-# Receive local network information from s3 server
-ipsync receive -remote_interface="pppoe-wan" -wg_interface="wg0" s3 -endpoint="https://s3.amazonaws.com" -access_key_id="admin" -secret_access_key="adminadmin" -bucket="storage" -object_path="home.json"
-## Receive local network information from minio s3 server
-ipsync receive -remote_interface="pppoe-wan" -wg_interface="wg0" s3 -endpoint="http://192.168.1.185:9000" -path_style -access_key_id="admin" -secret_access_key="adminadmin" -bucket="storage" -object_path="home.json"
-## Receive local network information from minio s3 server and decrypt the file
-ipsync receive -remote_interface="pppoe-wan" -wg_interface="wg0" s3 -endpoint="http://192.168.1.185:9000" -path_style -access_key_id="admin" -secret_access_key="adminadmin" -bucket="storage" -object_path="home.json" -encryption_key="admin123"
-## Receive local network information from minio s3 server and decrypt the file every 5 min
-ipsync receive -remote_interface="pppoe-wan" -wg_interface="wg0" -interval="5m" s3 -endpoint="http://192.168.1.185:9000" -path_style -access_key_id="admin" -secret_access_key="adminadmin" -bucket="storage" -object_path="home.json" -encryption_key="admin123"
-
-# Receive local network information from webdav server
-ipsync receive -remote_interface="pppoe-wan" -wg_interface="wg0" webdav -endpoint="http://192.168.1.2/" -filepath="/dav/home.json"
-## Receive local network information from webdav server and decrypt the file
-ipsync receive -remote_interface="pppoe-wan" -wg_interface="wg0" webdav -endpoint="http://192.168.1.2/" -filepath="/dav/home.json" -encryption_key="admin123"
-## Receive local network information from webdav server and decrypt the file every 5 min
-ipsync receive -remote_interface="pppoe-wan" -wg_interface="wg0" -interval="5m" webdav -endpoint="http://192.168.1.2/" -filepath="/dav/home.json" -encryption_key="admin123"
-
-# Decrypt a encrypted file
-ipsync decrypt -filepath "./home.json" -encryption_key="admin123"
+ipsync help [command]
 ```
 
 ## Install

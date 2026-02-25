@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func (p *Preload) UpdateWireGuardEndPoint(remoteInterface string, wgInterface string, wgPeerKey string, newEndpointPort int, interval time.Duration) (err error) {
+func (p Preload) UpdateWireGuardEndPoint(remoteInterface string, wgInterface string, wgPeerKey string, newEndpointPort int, interval time.Duration) (err error) {
 	if interval != 0 {
 		for {
 			// 获取第一个公网 IP

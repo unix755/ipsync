@@ -40,13 +40,13 @@ func Marshal(preload Preload, preloadType string, key []byte) (preloadBytes []by
 	return Encrypt(preloadBytes, key)
 }
 
-func Unmarshal(preloadBytes []byte, preloadType string, key []byte) (p *Preload, err error) {
+func Unmarshal(preloadBytes []byte, preloadType string, key []byte) (p Preload, err error) {
 	var preload Preload
 
 	// 比特流解密
 	preloadBytes, err = Decrypt(preloadBytes, key)
 	if err != nil {
-		return nil, err
+		return p, err
 	}
 
 	// 比特流转换为 preload
@@ -56,5 +56,5 @@ func Unmarshal(preloadBytes []byte, preloadType string, key []byte) (p *Preload,
 	case "xml":
 		err = xml.Unmarshal(preloadBytes, &preload)
 	}
-	return &preload, err
+	return preload, err
 }

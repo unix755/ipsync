@@ -7,11 +7,11 @@ import (
 )
 
 // FromS3 从 s3 服务器获取指定 id 的网络信息
-func FromS3(endpoint string, region string, accessKeyId string, secretAccessKey string, stsToken string, pathStyle bool, allowInsecure bool, bucket string, objectPath string, encryptionKey []byte) (p *preload.Preload, err error) {
+func FromS3(endpoint string, region string, accessKeyId string, secretAccessKey string, stsToken string, pathStyle bool, allowInsecure bool, bucket string, objectPath string, encryptionKey []byte) (p preload.Preload, err error) {
 	c := xS3.NewS3Client(endpoint, region, accessKeyId, secretAccessKey, stsToken, pathStyle, allowInsecure)
 	d, err := c.GetObject(bucket, objectPath)
 	if err != nil {
-		return nil, err
+		return p, err
 	}
 
 	// 读取从 s3 服务器下载的数据流

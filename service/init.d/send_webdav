@@ -4,12 +4,12 @@ START=90
 STOP=01
 USE_PROCD=1
 
-N_ENDPOINT="x"
-N_USERNAME="x"
-N_PASSWORD="x"
-N_FILEPATH="x"
-N_ENCRYPTION_KEY="x"
-N_INTERVAL="x"
+I_ENDPOINT="x"
+I_USERNAME="x"
+I_PASSWORD="x"
+I_FILEPATH="x"
+I_ENCRYPTION_KEY="x"
+I_INTERVAL="x"
 
 service_data() {
   echo "ipsync is starting up..."
@@ -18,7 +18,7 @@ service_data() {
 start_service() {
   procd_open_instance
   procd_set_param command /usr/local/bin/ipsync
-  procd_append_param command send webdav -endpoint=${N_ENDPOINT} -username=${N_USERNAME} -password=${N_PASSWORD} -filepath=${N_FILEPATH} -encryption_key=${N_ENCRYPTION_KEY} -interval=${N_INTERVAL}
+  procd_append_param command send -encryption_key=${I_ENCRYPTION_KEY} -interval=${I_INTERVAL} webdav -endpoint=${I_ENDPOINT} -username=${I_USERNAME} -password=${I_PASSWORD} -filepath=${I_FILEPATH}
   procd_set_param pidfile /var/run/ipsync.pid
   procd_set_param stdout 1
   procd_set_param stderr 1

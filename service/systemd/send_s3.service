@@ -3,12 +3,12 @@ Description=IP Sync Sender
 After=network.target network-online.target
 
 [Service]
-Environment="N_ENDPOINT=xxx"
-Environment="N_ACCESS_KEY_ID=xxx"
-Environment="N_SECRET_ACCESS_KEY=xxx"
-Environment="N_BUCKET=xxx"
-Environment="N_OBJECT_PATH=xxx"
-Environment="N_ENCRYPTION_KEY=xxx"
+Environment="I_ENDPOINT=xxx"
+Environment="I_ACCESS_KEY_ID=xxx"
+Environment="I_SECRET_ACCESS_KEY=xxx"
+Environment="I_BUCKET=xxx"
+Environment="I_OBJECT_PATH=xxx"
+Environment="I_ENCRYPTION_KEY=xxx"
 Type=oneshot
 User=root
 ExecStart=/usr/local/bin/ipsync send s3 -endpoint=${N_ENDPOINT} -path_style -access_key_id=${N_ACCESS_KEY_ID} -secret_access_key=${N_SECRET_ACCESS_KEY} -bucket=${N_BUCKET} -object_path=${N_OBJECT_PATH} -encryption_key=${N_ENCRYPTION_KEY}

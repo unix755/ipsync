@@ -3,11 +3,11 @@ Description=IP Sync Sender
 After=network.target network-online.target
 
 [Service]
-Environment="N_ENDPOINT=xxx"
-Environment="N_USERNAME=xxx"
-Environment="N_PASSWORD=xxx"
-Environment="N_FILEPATH=xxx"
-Environment="N_ENCRYPTION_KEY=xxx"
+Environment="I_ENDPOINT=xxx"
+Environment="I_USERNAME=xxx"
+Environment="I_PASSWORD=xxx"
+Environment="I_FILEPATH=xxx"
+Environment="I_ENCRYPTION_KEY=xxx"
 Type=oneshot
 User=root
 ExecStart=/usr/local/bin/ipsync send webdav -endpoint=${N_ENDPOINT} -username=${N_USERNAME} -password=${N_PASSWORD} -filepath=${N_FILEPATH} -encryption_key=${N_ENCRYPTION_KEY}

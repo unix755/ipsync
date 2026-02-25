@@ -8,20 +8,20 @@ import (
 )
 
 // FromWebDAV 从 webdav 服务器获取指定 id 的网络信息
-func FromWebDAV(endpoint string, username string, password string, allowInsecure bool, filepath string, encryptionKey []byte) (p *preload.Preload, err error) {
+func FromWebDAV(endpoint string, username string, password string, allowInsecure bool, filepath string, encryptionKey []byte) (p preload.Preload, err error) {
 	client, err := xWebDAV.NewClient(endpoint, username, password, allowInsecure)
 	if err != nil {
-		return nil, err
+		return p, err
 	}
 	response, err := client.Download(filepath)
 	if err != nil {
-		return nil, err
+		return p, err
 	}
 
 	// 读取从 webdav 服务器下载的数据流
 	d, err := io.ReadAll(response.Body)
 	if err != nil {
-		return nil, err
+		return p, err
 	}
 	return preload.Unmarshal(d, "json", encryptionKey)
 }
