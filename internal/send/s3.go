@@ -1,6 +1,8 @@
 package send
 
 import (
+	"encoding/json"
+	"ipsync/internal/cache"
 	"ipsync/internal/preload"
 	"log"
 	"time"
@@ -31,12 +33,34 @@ func ToS3(endpoint string, region string, accessKeyId string, secretAccessKey st
 
 func ToS3Loop(endpoint string, region string, accessKeyId string, secretAccessKey string, stsToken string, pathStyle bool, allowInsecure bool, bucket string, objectPath string, encryptionKey []byte, interval time.Duration) {
 	for {
-		location, err := ToS3(endpoint, region, accessKeyId, secretAccessKey, stsToken, pathStyle, allowInsecure, bucket, objectPath, encryptionKey)
+		// 获取 preload
+		p, err := preload.NewPreload()
 		if err != nil {
 			log.Println(err)
-		} else {
-			log.Printf("upload to %s", *location)
 		}
+		// 获取网络界面
+		bytes, err := json.Marshal(p.NetInterfaces)
+		if err != nil {
+			log.Println(err)
+		}
+
+		// 获取缓存中的 net_interfaces
+		cacheNetInterfaces, _ := cache.Get("net_interfaces")
+
+		if string(bytes) != cacheNetInterfaces {
+			// 发送到文件
+			location, err := ToS3(endpoint, region, accessKeyId, secretAccessKey, stsToken, pathStyle, allowInsecure, bucket, objectPath, encryptionKey)
+			if err != nil {
+				log.Println(err)
+			} else {
+				// 设置新的缓存 net_interfaces
+				cache.Set("net_interfaces", string(bytes))
+				log.Printf("new net interfaces found, upload to %s", *location)
+			}
+		} else {
+			log.Println("new net interfaces not found, skip")
+		}
+
 		time.Sleep(interval)
 	}
 }
