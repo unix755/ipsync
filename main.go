@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"ipsync/internal/preload"
-	"ipsync/internal/receive"
 	"ipsync/internal/send"
+	"ipsync/internal/watchdog"
 	"log"
 	"os"
 	"time"
@@ -20,6 +20,8 @@ func main() {
 	var skipTLSVerify bool
 	// 启用循环, 每一次运行之前的时间间隔
 	var interval time.Duration
+	// 指定取的公网 IP 对应的 remoteInterface
+	var remoteInterface string
 
 	// file 模式下本地存储文件地址, webdav 模式下服务端存储文件地址
 	var path string
@@ -39,7 +41,6 @@ func main() {
 	var objectPath string
 
 	// wireguard watchdog
-	var remoteInterface string
 	var wgInterface string
 	var wgPeerKey string
 
@@ -185,7 +186,7 @@ func main() {
 		{
 			Name:    "send",
 			Aliases: []string{"s"},
-			Usage:   "send network information to a remote server as a file",
+			Usage:   "send network information to a remote server or a file",
 			Flags:   CommonFlags,
 			Commands: []*cli.Command{
 				{
@@ -238,55 +239,113 @@ func main() {
 		{
 			Name:    "print",
 			Aliases: []string{"p"},
-			Usage:   "print network information from a file or local host.",
-			Flags: []cli.Flag{
+			Usage:   "print network information from a remote server or a file",
+			Flags: append([]cli.Flag{CommonFlags[0], CommonFlags[1]},
 				&cli.StringFlag{
-					Name:        "path",
-					Aliases:     []string{"p"},
-					Usage:       "file path used for printing network information",
+					Name:        "remoteInterface",
+					Usage:       "remote interface used for print first public IP",
 					Value:       "",
-					Sources:     cli.EnvVars("PRINT_PATH"),
-					Destination: &path,
+					Sources:     cli.EnvVars("REMOTE_INTERFACE"),
+					Destination: &remoteInterface,
+				}),
+			Commands: []*cli.Command{
+				{
+					Name:  "file",
+					Usage: "print network information from filesystem",
+					Flags: FileFlags,
+					Action: func(ctx context.Context, cmd *cli.Command) (err error) {
+						// 获取 preload
+						p, err := watchdog.FromFile(path, []byte(Key))
+						if err != nil {
+							return err
+						}
+						// 打印公网 IP
+						if remoteInterface != "" {
+							return p.PrintFirstPublicIP(remoteInterface)
+						}
+						// 打印 preload
+						bytes, err := preload.Marshal(p, "json", []byte{})
+						if err != nil {
+							return err
+						}
+						fmt.Println(string(bytes))
+						return nil
+					},
 				},
-				&cli.StringFlag{
-					Name:        "key",
-					Aliases:     []string{"k"},
-					Usage:       "key used for encryption",
-					Value:       "",
-					Sources:     cli.EnvVars("PRINT_KEY"),
-					Destination: &Key,
+				{
+					Name:  "s3",
+					Usage: "print network information from s3 server",
+					Flags: S3Flags,
+					Action: func(ctx context.Context, cmd *cli.Command) (err error) {
+						// 获取 preload
+						p, err := watchdog.FromS3(endpoint, region, username, password, stsToken, pathStyle, skipTLSVerify, bucket, objectPath, []byte(Key))
+						if err != nil {
+							return err
+						}
+						// 打印公网 IP
+						if remoteInterface != "" {
+							return p.PrintFirstPublicIP(remoteInterface)
+						}
+						// 打印 preload
+						bytes, err := preload.Marshal(p, "json", []byte{})
+						if err != nil {
+							return err
+						}
+						fmt.Println(string(bytes))
+						return nil
+					},
 				},
-			},
-			Action: func(ctx context.Context, cmd *cli.Command) (err error) {
-				// 提供路径则从文件中解码 preload 并打印, 不提供则打印本机 preload
-				if path != "" {
-					bytes, err := os.ReadFile(path)
-					if err != nil {
-						return err
-					}
-					plaintext, err := preload.Decrypt(bytes, []byte(Key))
-					if err != nil {
-						return err
-					}
-					fmt.Println(string(plaintext))
-				} else {
-					p, err := preload.NewPreload()
-					if err != nil {
-						return err
-					}
-					bytes, err := preload.Marshal(p, "json", []byte(Key))
-					if err != nil {
-						return err
-					}
-					fmt.Println(string(bytes))
-				}
-				return nil
+				{
+					Name:  "webdav",
+					Usage: "print network information from webdav server",
+					Flags: WebDAVFlags,
+					Action: func(ctx context.Context, cmd *cli.Command) (err error) {
+						// 获取 preload
+						p, err := watchdog.FromWebDAV(endpoint, username, password, skipTLSVerify, path, []byte(Key))
+						if err != nil {
+							return err
+						}
+						// 打印公网 IP
+						if remoteInterface != "" {
+							return p.PrintFirstPublicIP(remoteInterface)
+						}
+						// 打印 preload
+						bytes, err := preload.Marshal(p, "json", []byte{})
+						if err != nil {
+							return err
+						}
+						fmt.Println(string(bytes))
+						return nil
+					},
+				},
+				{
+					Name:  "local",
+					Usage: "print network information from local host",
+					Action: func(ctx context.Context, cmd *cli.Command) (err error) {
+						// 获取 preload
+						p, err := preload.NewPreload()
+						if err != nil {
+							return err
+						}
+						// 打印公网 IP
+						if remoteInterface != "" {
+							return p.PrintFirstPublicIP(remoteInterface)
+						}
+						// 打印 preload
+						bytes, err := preload.Marshal(p, "json", []byte{})
+						if err != nil {
+							return err
+						}
+						fmt.Println(string(bytes))
+						return nil
+					},
+				},
 			},
 		},
 		{
 			Name:    "watchdog",
 			Aliases: []string{"w"},
-			Usage:   "watchdog used to change the WireGuard endpoint.",
+			Usage:   "watchdog used to change the WireGuard endpoint",
 			Flags: append(CommonFlags,
 				&cli.StringFlag{
 					Name:        "wg_remote_interface",
@@ -318,7 +377,7 @@ func main() {
 					Flags: FileFlags,
 					Action: func(ctx context.Context, cmd *cli.Command) (err error) {
 						// 获取 preload
-						p, err := receive.FromFile(path, []byte(Key))
+						p, err := watchdog.FromFile(path, []byte(Key))
 						if err != nil {
 							return err
 						}
@@ -331,7 +390,7 @@ func main() {
 					Flags: S3Flags,
 					Action: func(ctx context.Context, cmd *cli.Command) (err error) {
 						// 获取 preload
-						p, err := receive.FromS3(endpoint, region, username, password, stsToken, pathStyle, skipTLSVerify, bucket, objectPath, []byte(Key))
+						p, err := watchdog.FromS3(endpoint, region, username, password, stsToken, pathStyle, skipTLSVerify, bucket, objectPath, []byte(Key))
 						if err != nil {
 							return err
 						}
@@ -344,7 +403,7 @@ func main() {
 					Flags: WebDAVFlags,
 					Action: func(ctx context.Context, cmd *cli.Command) (err error) {
 						// 获取 preload
-						p, err := receive.FromWebDAV(endpoint, username, password, skipTLSVerify, path, []byte(Key))
+						p, err := watchdog.FromWebDAV(endpoint, username, password, skipTLSVerify, path, []byte(Key))
 						if err != nil {
 							return err
 						}
