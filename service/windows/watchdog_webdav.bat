@@ -7,7 +7,6 @@ if not "%1"=="am_admin" (powershell start -verb runas '%0' am_admin & exit /b)
 cd /d %base%
 
 set KEY=""
-set INTERVAL=""
 set WG_REMOTE_INTERFACE=""
 set WG_INTERFACE=""
 set WEBDAV_ENDPOINT=""

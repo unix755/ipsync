@@ -4,7 +4,6 @@ After=network.target network-online.target
 
 [Service]
 Environment=KEY=""
-Environment=INTERVAL=""
 Environment=WEBDAV_ENDPOINT=""
 Environment=WEBDAV_USERNAME=""
 Environment=WEBDAV_PASSWORD=""

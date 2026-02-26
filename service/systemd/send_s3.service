@@ -4,7 +4,6 @@ After=network.target network-online.target
 
 [Service]
 Environment=KEY=""
-Environment=INTERVAL=""
 Environment=S3_ENDPOINT=""
 Environment=S3_ACCESS_KEY_ID=""
 Environment=S3_SECRET_ACCESS_KEY=""
