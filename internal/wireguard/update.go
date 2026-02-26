@@ -2,6 +2,10 @@ package wireguard
 
 import (
 	"fmt"
+	"ipsync/internal/cache"
+	"log"
+	"strconv"
+	"time"
 )
 
 // UpdateEndpoint 更新 endpoint
@@ -31,4 +35,29 @@ func UpdateEndpoint(wgInterface string, wgPeerKey string, newEndpointAddr string
 		}
 	}
 	return nil
+}
+
+// UpdateEndPointLoop 循环更新 endpoint
+func UpdateEndPointLoop(wgInterface string, wgPeerKey string, newEndpointAddr string, newEndpointPort int, interval time.Duration) (err error) {
+	if interval != 0 {
+		for {
+			// 缓存中查询
+			wgInfo := wgInterface + wgPeerKey + newEndpointAddr + strconv.Itoa(newEndpointPort)
+			cacheWGInfo, _ := cache.Get("wg_info")
+
+			// 查询到变化即更新
+			if wgInfo != cacheWGInfo {
+				err = UpdateEndpoint(wgInterface, wgPeerKey, newEndpointAddr, newEndpointPort)
+				if err != nil {
+					log.Println(err)
+				}
+				cache.Set("wg_info", wgInfo)
+			}
+
+			// 等待下一次运行
+			time.Sleep(interval)
+		}
+	} else {
+		return UpdateEndpoint(wgInterface, wgPeerKey, newEndpointAddr, newEndpointPort)
+	}
 }

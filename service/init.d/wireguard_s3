@@ -4,6 +4,9 @@ START=90
 STOP=01
 USE_PROCD=1
 
+export KEY=""
+export INTERVAL=""
+
 service_data() {
   echo "ipsync is starting up..."
 }
@@ -16,13 +19,15 @@ start_service() {
   procd_append_param env INTERVAL=""
   procd_append_param env WG_REMOTE_INTERFACE=""
   procd_append_param env WG_INTERFACE=""
-  procd_append_param env WEBDAV_ENDPOINT=""
-  procd_append_param env WEBDAV_USERNAME=""
-  procd_append_param env WEBDAV_PASSWORD=""
-  procd_append_param env WEBDAV_PATH=""
+  procd_append_param env S3_ENDPOINT=""
+  procd_append_param env S3_ACCESS_KEY_ID=""
+  procd_append_param env S3_SECRET_ACCESS_KEY=""
+  procd_append_param env S3_PATH_STYLE=true
+  procd_append_param env S3_BUCKET=""
+  procd_append_param env S3_OBJECT_PATH=""
 
   procd_set_param command /usr/local/bin/ipsync
-  procd_append_param command watchdog webdav
+  procd_append_param command wireguard s3
   procd_set_param pidfile /var/run/ipsync.pid
   procd_set_param stdout 1
   procd_set_param stderr 1

@@ -1,4 +1,4 @@
-package watchdog
+package receive
 
 import (
 	"ipsync/internal/preload"

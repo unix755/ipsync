@@ -9,9 +9,11 @@ cd /d %base%
 set KEY=""
 set WG_REMOTE_INTERFACE=""
 set WG_INTERFACE=""
-set WEBDAV_ENDPOINT=""
-set WEBDAV_USERNAME=""
-set WEBDAV_PASSWORD=""
-set WEBDAV_PATH=""
+set S3_ENDPOINT=""
+set S3_ACCESS_KEY_ID=""
+set S3_SECRET_ACCESS_KEY=""
+set S3_PATH_STYLE=true
+set S3_BUCKET=""
+set S3_OBJECT_PATH=""
 
-ipsync watchdog webdav
+ipsync wireguard s3

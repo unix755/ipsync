@@ -1,5 +1,5 @@
 [Unit]
-Description=IP Sync Watchdog
+Description=IP Sync WireGuard Watchdog
 After=network.target network-online.target
 
 [Service]
@@ -12,7 +12,7 @@ Environment=WEBDAV_PASSWORD=""
 Environment=WEBDAV_PATH=""
 Type=oneshot
 User=root
-ExecStart=/usr/local/bin/ipsync watchdog webdav
+ExecStart=/usr/local/bin/ipsync wireguard webdav
 
 [Install]
 WantedBy=multi-user.target

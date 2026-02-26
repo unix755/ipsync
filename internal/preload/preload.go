@@ -3,17 +3,18 @@ package preload
 import (
 	"encoding/json"
 	"encoding/xml"
-	"ipsync/internal/network"
 	"time"
+
+	"github.com/unix755/xtools/xNet"
 )
 
 type Preload struct {
-	UpdatedAt     time.Time              `json:"updatedAt,omitempty" xml:"updatedAt,omitempty" form:"updatedAt,omitempty"`
-	NetInterfaces []network.NetInterface `json:"netInterfaces" xml:"netInterfaces" form:"netInterfaces" binding:"required"`
+	UpdatedAt     time.Time           `json:"updatedAt,omitempty" xml:"updatedAt,omitempty" form:"updatedAt,omitempty"`
+	NetInterfaces []xNet.NetInterface `json:"netInterfaces" xml:"netInterfaces" form:"netInterfaces" binding:"required"`
 }
 
 func NewPreload() (preload Preload, err error) {
-	netInterfaces, err := network.GetNetInterfaces()
+	netInterfaces, err := xNet.GetNetInterfaces()
 	if err != nil {
 		return preload, err
 	}

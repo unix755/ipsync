@@ -1,5 +1,5 @@
 [Unit]
-Description=IP Sync Watchdog
+Description=IP Sync WireGuard Watchdog
 After=network.target network-online.target
 
 [Service]
@@ -14,7 +14,7 @@ Environment=S3_BUCKET=""
 Environment=S3_OBJECT_PATH=""
 Type=oneshot
 User=root
-ExecStart=/usr/local/bin/ipsync watchdog s3
+ExecStart=/usr/local/bin/ipsync wireguard s3
 
 [Install]
 WantedBy=multi-user.target
