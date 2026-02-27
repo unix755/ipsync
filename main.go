@@ -360,7 +360,7 @@ func main() {
 							return err
 						}
 
-						for _, ip := range append(p.GetInterface(wgRemoteInterface).Ipv6, p.GetInterface(wgRemoteInterface).Ipv4...) {
+						for _, ip := range append(p.GetNetInterface(wgRemoteInterface).Ipv6, p.GetNetInterface(wgRemoteInterface).Ipv4...) {
 							isPublic, err := xNet.IsPublic(ip)
 							if err != nil {
 								return err
@@ -384,7 +384,7 @@ func main() {
 							return err
 						}
 
-						for _, ip := range append(p.GetInterface(wgRemoteInterface).Ipv6, p.GetInterface(wgRemoteInterface).Ipv4...) {
+						for _, ip := range append(p.GetNetInterface(wgRemoteInterface).Ipv6, p.GetNetInterface(wgRemoteInterface).Ipv4...) {
 							isPublic, err := xNet.IsPublic(ip)
 							if err != nil {
 								return err
@@ -408,7 +408,7 @@ func main() {
 							return err
 						}
 
-						for _, ip := range append(p.GetInterface(wgRemoteInterface).Ipv6, p.GetInterface(wgRemoteInterface).Ipv4...) {
+						for _, ip := range append(p.GetNetInterface(wgRemoteInterface).Ipv6, p.GetNetInterface(wgRemoteInterface).Ipv4...) {
 							isPublic, err := xNet.IsPublic(ip)
 							if err != nil {
 								return err
