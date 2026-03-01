@@ -1,0 +1,26 @@
+#!/bin/sh
+# PROVIDE: ipsync
+# REQUIRE: DAEMON NETWORKING
+
+. /etc/rc.subr
+name=ipsync
+rcvar=${name}_enable
+command="/usr/local/bin/ipsync"
+pidfile="/var/run/${name}.pid"
+start_cmd="${name}_start"
+
+ipsync_start() {
+  # env
+  export KEY=""
+  export INTERVAL=""
+  export WEBDAV_ENDPOINT=""
+  export WEBDAV_USERNAME=""
+  export WEBDAV_PASSWORD=""
+  export WEBDAV_PATH=""
+
+  echo "Starting ${name}."
+  /usr/sbin/daemon -cf -p ${pidfile} ${command} send webdav
+}
+
+load_rc_config $name
+run_rc_command "$1"

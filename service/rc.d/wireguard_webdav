@@ -1,0 +1,28 @@
+#!/bin/sh
+# PROVIDE: ipsync
+# REQUIRE: DAEMON NETWORKING
+
+. /etc/rc.subr
+name=ipsync
+rcvar=${name}_enable
+command="/usr/local/bin/ipsync"
+pidfile="/var/run/${name}.pid"
+start_cmd="${name}_start"
+
+ipsync_start() {
+  # env
+  export KEY=""
+  export INTERVAL=""
+  export WG_REMOTE_INTERFACE=""
+  export WG_INTERFACE=""
+  export WEBDAV_ENDPOINT=""
+  export WEBDAV_USERNAME=""
+  export WEBDAV_PASSWORD=""
+  export WEBDAV_PATH=""
+
+  echo "Starting ${name}."
+  /usr/sbin/daemon -cf -p ${pidfile} ${command} wireguard webdav
+}
+
+load_rc_config $name
+run_rc_command "$1"

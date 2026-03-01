@@ -3,9 +3,8 @@
 ## Features
 
 - Send network information to remote server or file
-- Receive network information from remote server or file
-- Encrypted or decrypted transmission of network information
-- Show local network information
+- Print network information from remote server or file
+- Encrypt network information and transmit it to network services
 - Periodically update WireGuard endpoint IP
 
 ## Example
@@ -42,7 +41,15 @@ systemctl enable ipsync.timer && systemctl restart ipsync.timer && systemctl sta
 ```sh
 curl -Lo "/etc/init.d/ipsync" "https://github.com/unix755/ipsync/raw/main/service/init.d/send_webdav"
 chmod +x /etc/init.d/ipsync
-service ipsync enable && service ipsync restart && service ipsync status
+service ipsync enable && service ipsync restart
+```
+
+### FreeBSD(rc.d)
+
+```sh
+curl -Lo "/etc/rc.d/ipsync" "https://github.com/unix755/ipsync/raw/main/service/rc.d/send_webdav"
+chmod +x /etc/rc.d/ipsync
+service ipsync enable && service ipsync restart
 ```
 
 ## Compile
@@ -52,18 +59,6 @@ service ipsync enable && service ipsync restart && service ipsync status
 ```sh
 git clone https://github.com/unix755/ipsync.git
 cd ipsync
-export CGO_ENABLED=0
-go build -v -trimpath -ldflags "-s -w"
-```
-
-### For mipsle openwrt router
-
-```sh
-git clone https://github.com/unix755/ipsync.git
-cd ipsync
-export GOOS=linux
-export GOARCH=mipsle
-export GOMIPS=softfloat
 export CGO_ENABLED=0
 go build -v -trimpath -ldflags "-s -w"
 ```

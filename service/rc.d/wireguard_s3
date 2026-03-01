@@ -1,0 +1,30 @@
+#!/bin/sh
+# PROVIDE: ipsync
+# REQUIRE: DAEMON NETWORKING
+
+. /etc/rc.subr
+name=ipsync
+rcvar=${name}_enable
+command="/usr/local/bin/ipsync"
+pidfile="/var/run/${name}.pid"
+start_cmd="${name}_start"
+
+ipsync_start() {
+  # env
+  export KEY=""
+  export INTERVAL=""
+  export WG_REMOTE_INTERFACE=""
+  export WG_INTERFACE=""
+  export S3_ENDPOINT=""
+  export S3_ACCESS_KEY_ID=""
+  export S3_SECRET_ACCESS_KEY=""
+  export S3_PATH_STYLE=true
+  export S3_BUCKET=""
+  export S3_OBJECT_PATH=""
+
+  echo "Starting ${name}."
+  /usr/sbin/daemon -cf -p ${pidfile} ${command} wireguard s3
+}
+
+load_rc_config $name
+run_rc_command "$1"
