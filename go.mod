@@ -1,9 +1,9 @@
 module ipsync
 
-go 1.25.4
+go 1.26.5
 
 require (
-	github.com/unix755/xtools v1.1.7-0.20260225130013-1349292f852b
+	github.com/unix755/xtools v1.1.7-0.20260723073341-6a41e4d7def6
 	github.com/urfave/cli/v3 v3.10.1
 	golang.org/x/crypto v0.54.0
 )
